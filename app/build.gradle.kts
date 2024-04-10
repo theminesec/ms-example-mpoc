@@ -129,8 +129,8 @@ dependencies {
 
     implementation("com.jraska:console:1.2.0")
     implementation("com.jraska:console-timber-tree:1.2.0")
-    implementation("org.bouncycastle:bcpkix-jdk15to18:1.73")
-    implementation("org.bouncycastle:bcprov-jdk15to18:1.73")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.73")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.73")
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
 
@@ -138,5 +138,5 @@ dependencies {
     // for Android apps, supporting multiple log destinations simultaneously:
     implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("com.github.tony19:logback-android:3.0.0")
-    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.009.001")
+    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.009.005")
 }
