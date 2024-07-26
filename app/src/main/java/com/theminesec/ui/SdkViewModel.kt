@@ -227,6 +227,11 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
 
     @SuppressLint("LogNotTimber")
     fun submitTransaction() {
+        if (amount.isEmpty()) {
+            writeMessage("Transaction amount is not set")
+            return
+        }
+
         val dto = MhdEmvTransactionDto().apply {
             txnAmount = amount.toLong()
             cashBackAmount = amount.toLong()
