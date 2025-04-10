@@ -22,4 +22,6 @@
     <string name="tap_card_display">Tap the card on the phone</string>
     <string name="powered_by_">Powered by MineSec</string>
     <string name="show_online_transaction">Online transaction processing…</string>
+    <string name="var_copyright">© %1$s Some Copyrighted</string>
+
 </resources>

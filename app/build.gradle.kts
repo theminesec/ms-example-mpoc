@@ -30,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         buildConfig = true
@@ -121,8 +121,8 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
     implementation("io.reactivex.rxjava2:rxjava:2.2.19")
     //lombok dependencies
-    compileOnly("org.projectlombok:lombok:1.18.24")
-    annotationProcessor("org.projectlombok:lombok:1.18.24")
+    compileOnly("org.projectlombok:lombok:1.18.30")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
@@ -132,11 +132,9 @@ dependencies {
     implementation("org.bouncycastle:bcpkix-jdk18on:1.73")
     implementation("org.bouncycastle:bcprov-jdk18on:1.73")
 
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
-
     //logback-android is a lite version of logback that runs on Android. This library provides a highly configurable logging framework
     // for Android apps, supporting multiple log destinations simultaneously:
     implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("com.github.tony19:logback-android:3.0.0")
-    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.009.024")
+    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.010.025")
 }

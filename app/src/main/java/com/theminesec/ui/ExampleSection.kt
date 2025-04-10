@@ -17,7 +17,7 @@ import com.theminesec.ui.components.BrandedButton
 import com.theminesec.ui.components.CircleLoadingIndicator
 
 @Composable
-fun ExampleSection(viewsModel: SdkViewModel) {
+fun ExampleSection(viewsModel: SdkViewModel,onPaymentRequested: () -> Unit) {
     val sdkInitialized by viewsModel.isSdkInitialized.collectAsState()
 
 
@@ -61,11 +61,13 @@ fun ExampleSection(viewsModel: SdkViewModel) {
         AmountInput {
             viewsModel.setTranAmount(it)
         }
-        BrandedButton(onClick = {viewsModel.submitTransaction()}, label = "start transaction")
+        //BrandedButton(onClick = {viewsModel.submitTransaction()}, label = "start transaction")
+        BrandedButton(onClick = {onPaymentRequested()}, label = "start transaction(New)")
 
         Title(text = "4.Entry Pin (opt)")
         Text(text = "PinEntry SCA")
-        BrandedButton(onClick = {viewsModel.pinEntry()}, label = "PIN Entry")
+        //BrandedButton(onClick = {viewsModel.pinEntry()}, label = "PIN Entry")
+        OpenSecurePinPad()
 
         Title(text = "4.submit transaction")
         Text(text = "submit the transaction to backend")

@@ -7,9 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.theminesec.MineHades.EMV_APPLIST
 import com.theminesec.MineHades.EMV_PARAM
 import com.theminesec.MineHades.MPoCAPI
-import com.theminesec.MineHades.Model.MPoCResult
-import com.theminesec.MineHades.vo.MhdEmvTransactionDto
-import com.theminesec.MineHades.vo.MhdEmvTransactionType
+import com.theminesec.MineHades.models.MPoCResult
+import com.theminesec.MineHades.models.MhdEmvTransactionDto
+import com.theminesec.MineHades.models.MhdEmvTransactionType
+import com.theminesec.MineHades.models.TranType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,7 @@ import kotlin.random.Random
 class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
     private val logger = LoggerFactory.getLogger("PAY")
     private val json = Json { encodeDefaults = true }
-    private var amount: String = ""
+    var amount: String = ""
 
 
     private val _messages: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
@@ -232,13 +233,11 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
             return
         }
 
-        val dto = MhdEmvTransactionDto().apply {
-            txnAmount = amount.toLong()
-            cashBackAmount = amount.toLong()
-            txnNo = Random.nextLong(999999)
-            txnType = MhdEmvTransactionType.MHD_EMV_TRANS_PURCHASE
-            cardKeyAlias = "keyAlias"
-        }
+        val dto = MhdEmvTransactionDto(
+            txnAmount = amount.toLong(),
+            txnNo = Random.nextLong(999999),
+            txnType = TranType.SALE
+        )
         MPoCAPI.startEmvTransaction(dto) {
             when (it) {
                 is MPoCResult.Success -> {
