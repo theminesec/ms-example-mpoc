@@ -2,7 +2,6 @@
 buildscript {
     dependencies {
         // package dependency into aar
-        classpath("com.github.aasitnikov:fat-aar-android:b2a038763c")
         // classpath("com.huawei.agconnect:agcp:1.6.5.300")
     }
 }
