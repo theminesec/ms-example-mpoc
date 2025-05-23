@@ -43,7 +43,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.theminesec.MineHades.activity.MineSecPaymentActivity
-import com.theminesec.MineHades.activity.SecurePinPadActivity
 import com.theminesec.MineHades.activity.pinpad.ButtonsColor
 import com.theminesec.MineHades.activity.pinpad.PinEntryDetails
 import com.theminesec.MineHades.activity.pinpad.PinPadConfig
@@ -60,10 +59,14 @@ import com.theminesec.example.sdk.softpos.ui.theme.MsExampleSdkSoftPOSTheme
 import com.theminesec.mpocsample.R
 import com.theminesec.ui.components.BrandedButton
 import com.theminesec.ui.components.SplitSection
+import com.theminesec.utils.BytesUtils
 import com.theminesec.utils.GsonUtils.gson
 import com.theminesec.utils.PinPadStylesUtil
+import com.theminesec.utils.toX509Certificate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.util.Base64
+import javax.crypto.Cipher
 
 @Composable
 fun ScreenContent() {
@@ -175,10 +178,15 @@ class MainActivity : ComponentActivity() {
             sdkViewModel.writeMessage("Invalid amount. Transaction cannot proceed.")
             return
         }
+        val plainTextKey = "11223344556677881122334455999999"
+        val publicKey = sdkViewModel.readPublicKeyCert().toX509Certificate()
+        val wrappedKey = sdkViewModel.rsaCipher(publicKey.publicKey, BytesUtils.fromString(plainTextKey))
+
         val transactionDto = MhdEmvTransactionDto(
             txnAmount = sdkViewModel.amount.toLong(),
             txnCurrencyText = "USD",
-            timeout = 80
+            timeout = 80,
+            wrappedHMacKey = Base64.getEncoder().encodeToString(wrappedKey)
         )
         // with customized PIN entry UI
         val pinPadConfig = PinPadConfig(
@@ -292,12 +300,19 @@ fun OpenSecurePinPad() {
             //putString(PinPadConfig.EXTRA_PIN_TAP_CAPTURE, requestTAP)
         }
 
-        val intent = Intent(context, SecurePinPadActivity::class.java).apply {
+//        val intent = Intent(context, SecurePinPadActivity::class.java).apply {
+//            putExtra(PinPadConstants.EXTRA_PIN_PAD_CONFIG, getPinPadConfig(context, selectedMode.value))
+//            putExtra(PinPadConstants.BUNDLE_PIN_REQUEST, bundle)
+//        }
+
+
+        val intent2=Intent("com.theminesec.minehades.PIN_ACTIVITY").apply {
+            // addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) Note: YOU CAN NOT ADD THIS !!
             putExtra(PinPadConstants.EXTRA_PIN_PAD_CONFIG, getPinPadConfig(context, selectedMode.value))
             putExtra(PinPadConstants.BUNDLE_PIN_REQUEST, bundle)
         }
 
-        launcher.launch(intent)
+        launcher.launch(intent2)
     }, label = "Open Secure PinPad")
 }
 
