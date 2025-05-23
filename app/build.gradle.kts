@@ -136,5 +136,5 @@ dependencies {
     // for Android apps, supporting multiple log destinations simultaneously:
     implementation("org.slf4j:slf4j-api:2.0.9")
     implementation("com.github.tony19:logback-android:3.0.0")
-    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.010.025")
+    implementation("com.theminesec.sdk.mpoc:core-mpoc-stage:2.01.001.011.029")
 }

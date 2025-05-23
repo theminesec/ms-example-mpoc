@@ -18,6 +18,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
+import java.security.Key
+import java.security.spec.MGF1ParameterSpec
+import javax.crypto.Cipher
+import javax.crypto.spec.OAEPParameterSpec
+import javax.crypto.spec.PSource
 import kotlin.random.Random
 
 class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -268,5 +273,34 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun readPublicKeyCert(): String {
+        return when (val result = MPoCAPI.getSdkInfo()) {
+            is MPoCResult.Success -> result.data.kekCert
+            else -> ""
+        }
+    }
+
+    //KeyWrappingMethod.RSA_OAEP_SHA1_SHA256
+    fun rsaCipher(
+        key: Key,
+        input: ByteArray,
+    ): ByteArray {
+        return runCatching {
+            val oaepSpec = OAEPParameterSpec(
+                "SHA-256", "MGF1",
+                MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT
+            )
+            val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
+                .apply {
+                    init(Cipher.ENCRYPT_MODE, key, oaepSpec)
+                }
+            cipher.doFinal(input)
+        }.onFailure {
+            val builder = StringBuilder().apply {
+                append("failed        ${it.message}")
+            }
+            logger.error(builder.toString(), it.cause)
+        }.getOrThrow()
+    }
 
 }
