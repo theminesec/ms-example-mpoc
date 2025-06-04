@@ -18,6 +18,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
+import java.security.Key
+import java.security.spec.MGF1ParameterSpec
+import javax.crypto.Cipher
+import javax.crypto.spec.OAEPParameterSpec
+import javax.crypto.spec.PSource
 import kotlin.random.Random
 
 class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
@@ -114,11 +119,10 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun setupEmv() {
-        writeMessage("setup EMV PARAM")
-        setupEmvParam()
-
         writeMessage("setup EMV APP")
         setEmvApp()
+        writeMessage("setup EMV PARAM")
+        setupEmvParam()
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -150,7 +154,6 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
         params.cL_CVMLimit = 20000.toLong()
         params.cL_ReaderCapability = "C8".hexToByteArray()
         params.cL_ReaderCapabilityEx = "18E00003".hexToByteArray()
-        params.terminalFloorLimit = ByteBuffer.allocate(4).putInt(1000000).array()
         params.setbImplAcqOpt("0000".hexToByteArray())
 
         MPoCAPI.setupEmvParam(params)
@@ -211,12 +214,62 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
         emvApp.riskManData = "00000000000000000000".hexToByteArray()
         emvApp.cL_bStatusCheck = 1
         emvApp.cL_FloorLimit = 0
-        emvApp.cL_TransLimit = 50000
+        emvApp.cL_TransLimit = 5000000
         emvApp.cL_CVMLimit = 1000
         emvApp.kernelId = 0
         emvApp.t_TTQ = "26804080".hexToByteArray()
 
-        MPoCAPI.setupEmvApp(listOf(emvApp))
+        val mcApp = EMV_APPLIST()
+        mcApp.aid = "A000000004".hexToByteArray()
+        mcApp.aidLen = 5.toByte()
+        mcApp.selFlag = 0.toByte()
+        mcApp.priority = 0.toByte()
+        mcApp.targetPer = 0.toByte()
+        mcApp.maxTargetPer = 0.toByte()
+        mcApp.floorLimit = 1
+        mcApp.randTransSel = 1
+        mcApp.velocityCheck = 1
+        mcApp.threshold = 0
+        mcApp.tacDenial = "0000000000".hexToByteArray()
+        mcApp.tacOnline = "0000000000".hexToByteArray()
+        mcApp.tacDefault = "0000000000".hexToByteArray()
+        mcApp.acquierId = "000000123489".hexToByteArray()
+        mcApp.setdDOL("039F3704".hexToByteArray())
+        mcApp.settDOL("0F9F02065F2A029A039C0195059F3704".hexToByteArray())
+        mcApp.version = "0096".hexToByteArray()
+        mcApp.riskManData = "00000000000000000000".hexToByteArray()
+        mcApp.cL_bStatusCheck = 1
+        mcApp.cL_FloorLimit = 0
+        mcApp.cL_TransLimit = 5000000
+        mcApp.cL_CVMLimit = 1000
+        mcApp.kernelId = 0
+
+        val amexApp = EMV_APPLIST()
+        amexApp.aid = "A00000002501".hexToByteArray()
+        amexApp.aidLen = 6.toByte()
+        amexApp.selFlag = 0.toByte()
+        amexApp.priority = 0.toByte()
+        amexApp.targetPer = 0.toByte()
+        amexApp.maxTargetPer = 0.toByte()
+        amexApp.floorLimit = 1
+        amexApp.randTransSel = 1
+        amexApp.velocityCheck = 1
+        amexApp.threshold = 0
+        amexApp.tacDenial = "0000000000".hexToByteArray()
+        amexApp.tacOnline = "0000000000".hexToByteArray()
+        amexApp.tacDefault = "0000000000".hexToByteArray()
+        amexApp.acquierId = "000000123489".hexToByteArray()
+        amexApp.setdDOL("039F3704".hexToByteArray())
+        amexApp.settDOL("0F9F02065F2A029A039C0195059F3704".hexToByteArray())
+        amexApp.version = "0096".hexToByteArray()
+        amexApp.riskManData = "00000000000000000000".hexToByteArray()
+        amexApp.cL_bStatusCheck = 1
+        amexApp.cL_FloorLimit = 0
+        amexApp.cL_TransLimit = 5000000
+        amexApp.cL_CVMLimit = 1000
+        amexApp.kernelId = 0
+
+        MPoCAPI.setupEmvApp(listOf(emvApp,mcApp,amexApp))
 
     }
 
@@ -268,5 +321,34 @@ class SdkViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun readPublicKeyCert(): String {
+        return when (val result = MPoCAPI.getSdkInfo()) {
+            is MPoCResult.Success -> result.data.kekCert
+            else -> ""
+        }
+    }
+
+    //KeyWrappingMethod.RSA_OAEP_SHA1_SHA256
+    fun rsaCipher(
+        key: Key,
+        input: ByteArray,
+    ): ByteArray {
+        return runCatching {
+            val oaepSpec = OAEPParameterSpec(
+                "SHA-256", "MGF1",
+                MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT
+            )
+            val cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding")
+                .apply {
+                    init(Cipher.ENCRYPT_MODE, key, oaepSpec)
+                }
+            cipher.doFinal(input)
+        }.onFailure {
+            val builder = StringBuilder().apply {
+                append("failed        ${it.message}")
+            }
+            logger.error(builder.toString(), it.cause)
+        }.getOrThrow()
+    }
 
 }
